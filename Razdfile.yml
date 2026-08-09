@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/razd-cli/razd/main/.schema/razdfile.schema.json
+version: "1"
+
+# Environment provisioning via devbox.
+# Versioned packages (all-lowercase tool names) live in `ensure` and stay in
+# sync with devbox.json on `razd up`. PHP extensions (php84Extensions.*),
+# php84Packages.composer and the shell config carry no version, so they live
+# only in devbox.json and are preserved as-is by the sync.
+dependencies:
+    using: "devbox"
+
+    ensure:
+        - "php@8.4.15"
+        - "nodejs@22"
+
+# Tasks run inside `devbox run --`, so php / composer / node are on PATH.
+tasks:
+    default:
+        deps: [install]
+        cmds:
+            - echo "Project ready. Run 'razd run dev' to start the server."
+
+    install:
+      cmds:
+        - composer install --no-interaction
+        - npm install
+
+    build: npm run build
+    dev: php artisan serve --host=0.0.0.0 --port=8000
+    migrate: php artisan migrate --force
+    key: php artisan key:generate
+    lint: composer lint
+    test: composer test
